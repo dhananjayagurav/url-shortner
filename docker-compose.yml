@@ -1,0 +1,25 @@
+# Phase 1: only PostgreSQL. Redis (Phase 6), Kafka (Phase 11), Prometheus/Grafana
+# (Phase 12) are added incrementally in later phases — resist the urge to add
+# them early; the point is to feel *why* each one becomes necessary.
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: url-shortener-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-urlshortener}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-urlshortener}
+      POSTGRES_DB: ${POSTGRES_DB:-urlshortener}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-urlshortener}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pg_data:
