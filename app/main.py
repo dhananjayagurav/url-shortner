@@ -5,10 +5,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, HttpUrl
 
-from shortcode import generate_short_code
-from storage import save_url, find_url
+from app.shortcode import generate_short_code
+from app.storage import save_url, find_url
 
-app = FastAPI(title="URL shortner")
+app = FastAPI(title="URL shortner -> step 1.2")
 
 class CreateURLRequest(BaseModel):
     url: HttpUrl
@@ -19,7 +19,7 @@ class CreateURLResponse(BaseModel):
 
 @app.post("/api/v1/urls", response_model=CreateURLResponse, status_code=201)
 def create_url(payload: CreateURLRequest):
-    short_code = generate_short_code(k = 7)
+    short_code = generate_short_code(length = 7)
     save_url(short_code, str(payload.url))
     return CreateURLResponse(
         short_code=short_code,
@@ -29,8 +29,8 @@ def create_url(payload: CreateURLRequest):
 
 @app.get("/{short_code}")
 def redirect(short_code: str):
-    url = find_url(short_code)
-    if url is not None:
+    orig_url = find_url(short_code)
+    if orig_url is None:
         raise HTTPException(status_code=404, detail="short code not found")
-    return RedirectResponse(url, status_code=302)
+    return RedirectResponse(url=orig_url, status_code=302)
 
