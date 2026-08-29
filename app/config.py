@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     base_url: str = "http://localhost:8000"
 
     database_url: str = (
-        "postgresql+psycopg://urlshortner:urlshortner@localhost:5432/urlshortner"
+        "postgresql+psycopg://urlshortener:urlshortener@localhost:5432/urlshortener"
     )
 
 
