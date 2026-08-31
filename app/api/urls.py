@@ -33,3 +33,13 @@ def redirect(short_code: str, service: UrlService = Depends(get_url_service)):
     if original_url is None:
         raise HTTPException(status_code=404, detail="Short code not found")
     return RedirectResponse(url=original_url, status_code=302)
+
+@router.delete(
+        "/api/v1/urls/{short_code}",
+        status_code=status.HTTP_204_NO_CONTENT,
+        )
+def delete_url(short_code: str, service: UrlService = Depends(get_url_service)):
+    result = service.delete_short_url(short_code)
+    if not result:
+        raise HTTPException(status_code=404, detail="Short code not present, can't delete")
+    

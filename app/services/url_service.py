@@ -29,3 +29,6 @@ class UrlService:
     def resolve(self, short_code: str) -> str | None:
         url = self.repository.get_by_short_code(short_code)
         return url.original_url if url else None
+
+    def delete_short_url(self, short_code: str) -> bool:
+        return self.repository.delete(short_code=short_code)

@@ -1,7 +1,10 @@
 """Data access layer. The service layer never touches SQLAlchemy directly --
 only this module does. This is what lets us swap storage later without
 touching business logic."""
+from datetime import datetime, timezone
+
 from sqlalchemy.orm import Session
+from sqlalchemy import update
 
 from app.models.url import Url
 
@@ -18,4 +21,21 @@ class UrlRepository:
         return url
 
     def get_by_short_code(self, short_code: str) -> Url | None:
-        return self.db.query(Url).filter(Url.short_code == short_code).first()
+        return (
+            self.db.query(Url)
+            .filter(Url.short_code == short_code, Url.is_active.is_(True))
+            .first()
+        )
+
+    def delete(self, short_code: str) -> bool:
+        stmt = (
+            update(Url)
+            .where(Url.short_code == short_code)
+            .values(is_active=False, deleted_at=datetime.now(timezone.utc))
+        )
+        result = self.db.execute(stmt)
+        if result.rowcount == 0:
+            return False
+        else:
+            self.db.commit()
+            return True
