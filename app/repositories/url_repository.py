@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 from sqlalchemy import update
+from app.core.base62 import encode
 
 from app.models.url import Url
 
@@ -13,9 +14,11 @@ class UrlRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create(self, short_code: str, original_url: str) -> Url:
-        url = Url(short_code=short_code, original_url=original_url)
+    def create(self, original_url: str) -> Url:
+        url = Url(original_url=original_url)
         self.db.add(url)
+        self.db.flush()
+        url.short_code = encode(url.id)
         self.db.commit()
         self.db.refresh(url)
         return url

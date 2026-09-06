@@ -12,7 +12,7 @@ class Url(Base):
     __tablename__ = "urls"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    short_code: Mapped[str] = mapped_column(String(16), unique=True, index=True, nullable=False)
+    short_code: Mapped[str] = mapped_column(String(16), unique=True, index=True, nullable=True)
     original_url: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
