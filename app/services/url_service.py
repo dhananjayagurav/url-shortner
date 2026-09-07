@@ -4,11 +4,14 @@ just changed from a dict to Postgres -- that's the whole point."""
 
 from app.config import get_settings
 from app.repositories.url_repository import UrlRepository
+from app.cache.url_cache import UrlCache
+
 
 
 class UrlService:
-    def __init__(self, repository: UrlRepository):
+    def __init__(self, repository: UrlRepository, cache: UrlCache):
         self.repository = repository
+        self.cache = cache
         self.settings = get_settings()
 
     def create_short_url(self, original_url: str) -> tuple[str, str]:
@@ -17,8 +20,17 @@ class UrlService:
         return url.short_code, short_url
 
     def resolve(self, short_code: str) -> str | None:
+        cached_url = self.cache.get(short_code)
+        if cached_url is not None:
+            return cached_url
+
         url = self.repository.get_by_short_code(short_code)
-        return url.original_url if url else None
+        if url is None:
+            return None
+
+        self.cache.set(short_code, url.original_url)
+        return url.original_url
 
     def delete_short_url(self, short_code: str) -> bool:
         return self.repository.delete(short_code=short_code)
+    

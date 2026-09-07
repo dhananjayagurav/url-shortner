@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     database_url: str = (
         "postgresql+psycopg://urlshortener:urlshortener@localhost:5432/urlshortener"
     )
+    redis_url: str = "redis://localhost:6379/0"
 
 
 @lru_cache

@@ -9,12 +9,13 @@ from app.core.database import get_db
 from app.repositories.url_repository import UrlRepository
 from app.schemas.url import CreateUrlRequest, CreateUrlResponse
 from app.services.url_service import UrlService
+from app.cache.url_cache import UrlCache
 
 router = APIRouter()
 
 
 def get_url_service(db: Session = Depends(get_db)) -> UrlService:
-    return UrlService(UrlRepository(db))
+    return UrlService(UrlRepository(db), UrlCache())
 
 
 @router.post(
