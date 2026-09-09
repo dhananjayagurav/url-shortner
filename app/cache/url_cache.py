@@ -5,6 +5,7 @@ know Postgres exists, and the repository doesn't know Redis exists."""
 import logging
 from redis.exceptions import RedisError
 from app.cache.redis_client import redis_client
+from app.cache import circuit_breaker
 import random
 
 logger = logging.getLogger(__name__)
@@ -14,21 +15,33 @@ _TTL_JITTER_SECONDS = 300  # +/- up to 5 minutes
 
 class UrlCache:
     def get(self, short_code: str) -> str | None:
+        if circuit_breaker.is_open():
+            return None
         try:
-            return redis_client.get(short_code)
+            value = redis_client.get(short_code)
+            circuit_breaker.record_success()
+            return value
         except RedisError:
+            circuit_breaker.record_failure()
             logger.warning("cache get failed for %s", short_code, exc_info=True)
             return None
 
     def set(self, short_code: str, original_url: str) -> None:
+        if circuit_breaker.is_open():
+            return 
         try:
             ttl = _TTL_SECONDS + random.randint(-_TTL_JITTER_SECONDS, _TTL_JITTER_SECONDS)
             redis_client.set(short_code, original_url, ex=ttl)
+            circuit_breaker.record_success()
         except RedisError:
+            circuit_breaker.record_failure()
             logger.warning("cache set failed for %s", short_code, exc_info=True)
 
     def delete(self, short_code: str) -> None:
+        if circuit_breaker.is_open():
+            return
         try:
             redis_client.unlink(short_code)
+            circuit_breaker.record_success()
         except RedisError:
             logger.warning("cache set failed for %s", short_code, exc_info=True)
