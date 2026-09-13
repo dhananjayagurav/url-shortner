@@ -10,6 +10,8 @@ from app.repositories.url_repository import UrlRepository
 from app.schemas.url import CreateUrlRequest, CreateUrlResponse
 from app.services.url_service import UrlService
 from app.cache.url_cache import UrlCache
+from app.ratelimit.limiter import rate_limit_dependency
+
 
 router = APIRouter()
 
@@ -22,6 +24,7 @@ def get_url_service(db: Session = Depends(get_db)) -> UrlService:
     "/api/v1/urls",
     response_model=CreateUrlResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit_dependency)],
 )
 def create_url(payload: CreateUrlRequest, service: UrlService = Depends(get_url_service)):
     short_code, short_url = service.create_short_url(str(payload.url))
