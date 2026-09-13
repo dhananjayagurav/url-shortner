@@ -2,11 +2,10 @@
 (create_short_url, resolve), and it has no idea the storage underneath
 just changed from a dict to Postgres -- that's the whole point."""
 
+from app.cache.stampede_guard import get_lock
+from app.cache.url_cache import UrlCache
 from app.config import get_settings
 from app.repositories.url_repository import UrlRepository
-from app.cache.url_cache import UrlCache
-from app.cache.stampede_guard import get_lock
-
 
 
 class UrlService:

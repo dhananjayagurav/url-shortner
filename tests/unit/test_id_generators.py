@@ -1,12 +1,12 @@
 import pytest
 
+from app.core.base62 import decode
 from app.core.id_generators import (
     IdGenerator,
     RandomBase62Generator,
     SnowflakeGenerator,
     UuidBase62Generator,
 )
-from app.core.base62 import decode
 
 
 def test_cannot_instantiate_abstract_base():

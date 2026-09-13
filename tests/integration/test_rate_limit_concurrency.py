@@ -1,6 +1,8 @@
 """Needs the app running (uvicorn) and Redis up -- real HTTP."""
 import concurrent.futures
+
 import httpx
+
 from app.cache.redis_client import redis_client
 
 BASE_URL = "http://localhost:8000"

@@ -1,12 +1,13 @@
 """ORM model for the `urls` table. Kept minimal for Phase 1 -- Phase 2 adds
 expires_at, user_id, is_active and discusses indexing in depth."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import BigInteger, Boolean, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
+
 
 class Url(Base):
     __tablename__ = "urls"
@@ -15,7 +16,7 @@ class Url(Base):
     short_code: Mapped[str] = mapped_column(String(16), unique=True, index=True, nullable=True)
     original_url: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
     )
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     user_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)

@@ -17,9 +17,10 @@ import time
 import uuid
 from abc import ABC, abstractmethod
 
-from app.core.base62 import encode
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+
+from app.core.base62 import encode
 from app.models.url import Url
 
 

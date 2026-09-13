@@ -5,13 +5,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
+from app.cache.url_cache import UrlCache
 from app.core.database import get_db
+from app.ratelimit.limiter import rate_limit_dependency
 from app.repositories.url_repository import UrlRepository
 from app.schemas.url import CreateUrlRequest, CreateUrlResponse
 from app.services.url_service import UrlService
-from app.cache.url_cache import UrlCache
-from app.ratelimit.limiter import rate_limit_dependency
-
 
 router = APIRouter()
 

@@ -5,7 +5,7 @@ _BASE = len(_ALPHANUM)
 
 def encode(num: int) -> str:
     result = []
-    ans = str()
+    ans = ""
     if (num < 0):
         raise ValueError("Pls provide number > 0")
     

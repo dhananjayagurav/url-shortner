@@ -3,10 +3,12 @@ inside it. The service decides when to use the cache. The cache doesn't
 know Postgres exists, and the repository doesn't know Redis exists."""
 
 import logging
-from redis.exceptions import RedisError
-from app.cache.redis_client import redis_client
-from app.cache import circuit_breaker
 import random
+
+from redis.exceptions import RedisError
+
+from app.cache import circuit_breaker
+from app.cache.redis_client import redis_client
 
 logger = logging.getLogger(__name__)
 _TTL_SECONDS = 3600  # one hour -- Phase 7 looks at TTL choice properly

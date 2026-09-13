@@ -1,4 +1,5 @@
 import pytest
+
 from app.core.base62 import decode, encode
 
 

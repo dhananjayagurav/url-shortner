@@ -27,7 +27,7 @@ class _UnsafeSnowflakeGenerator(SnowflakeGenerator):
 
         timestamp_part = (now - self._EPOCH_MS) << (self._MACHINE_ID_BITS + self._SEQUENCE_BITS)
         machine_part = self._machine_id << self._SEQUENCE_BITS
-        return encode((timestamp_part | machine_part | self._sequence))
+        return encode(timestamp_part | machine_part | self._sequence)
 
 
 def _run_concurrently(generator, count: int) -> list[str]:
