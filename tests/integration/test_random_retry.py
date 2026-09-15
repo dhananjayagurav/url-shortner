@@ -1,5 +1,17 @@
 from app.core.database import SessionLocal
 from app.core.id_generators import IdGenerator, create_with_random_retry
+from app.models.url import Url
+
+
+def teardown_function():
+    db = SessionLocal()
+    try:
+        db.query(Url).filter(Url.short_code.in_(["retry-a", "retry-b"])).delete(
+            synchronize_session=False
+        )
+        db.commit()
+    finally:
+        db.close()
 
 
 class _FixedThenNewGenerator(IdGenerator):

@@ -1,11 +1,13 @@
-"""Needs the app running (uvicorn) and Redis up -- real HTTP."""
+"""Real Redis, real Postgres, real HTTP path through FastAPI's
+TestClient -- same style as test_rate_limiter.py, run concurrently."""
 import concurrent.futures
 
-import httpx
+from fastapi.testclient import TestClient
 
 from app.cache.redis_client import redis_client
+from app.main import app
 
-BASE_URL = "http://localhost:8000"
+client = TestClient(app)
 
 
 def setup_function():
@@ -14,8 +16,8 @@ def setup_function():
 
 
 def _hit_once(_: int) -> int:
-    resp = httpx.post(
-        f"{BASE_URL}/api/v1/urls",
+    resp = client.post(
+        "/api/v1/urls",
         json={"url": "https://example.com/rl-race"},
     )
     return resp.status_code
