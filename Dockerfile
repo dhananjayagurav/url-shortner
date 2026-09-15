@@ -3,7 +3,8 @@ FROM python:3.12-slim AS builder
 WORKDIR /build 
 
 COPY requirements.txt ./
-RUN pip install --no-cache-dir --target=/install -r requirements.txt
+# builder stage
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
 # ---- stage 2: final -- the actual runtime image ----
 FROM python:3.12-slim 
@@ -11,7 +12,7 @@ WORKDIR /app
 
 # Bring in only the installed packages from the builder stage --
 # none of pip's cache, none of the build tooling, none of requirements.txt itself.
-COPY --from=builder /install /usr/local/lib/python3.12/site-packages 
+COPY --from=builder /install /usr/local 
 
 # App code, and what alembic needs to run migrations against this image later.
 COPY app ./app
