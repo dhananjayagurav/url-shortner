@@ -1,16 +1,37 @@
 name: CI
 
-
 on:
   push:
     branches: ["**"]
-  pull_request: 
+  pull_request:
     branches: [main]
 
-
 jobs:
-  lint-and-test:
+  test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -18,5 +39,32 @@ jobs:
           python-version: "3.12"
       - run: pip install -e ".[dev]"
       - run: ruff check .
-      - run: pytest tests/unit -v
+      - run: alembic upgrade head
+        env:
+          DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/test_db
+      - run: pytest tests/unit tests/integration -v
+        env:
+          DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
 
+  build-and-push:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: ecr-login
+
+      - run: |
+          docker build -t $ECR_REGISTRY/url-shortener:$GITHUB_SHA .
+          docker push $ECR_REGISTRY/url-shortener:$GITHUB_SHA
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
