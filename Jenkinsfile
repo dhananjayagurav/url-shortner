@@ -14,12 +14,12 @@ pipeline {
     }
     stage('Lint') {
       steps {
-        sh 'ruff check .'
+        sh 'python3 -m ruff check .'
       }
     }
     stage('Unit tests') {
       steps {
-        sh 'pytest tests/unit -v'
+        sh 'python3 -m pytest tests/unit -v'
       }
     }
   }
