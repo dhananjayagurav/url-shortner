@@ -1,0 +1,40 @@
+{
+  "family": "url-shortener-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::626672433456:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "app",
+      "image": "626672433456.dkr.ecr.us-east-1.amazonaws.com/url-shortener:dede12de7e4757818259ed7a43bd5ab2928df01d",
+      "portMappings": [{ "containerPort": 8000 }],
+      "environment": [
+        { "name": "DATABASE_URL", "value": "postgresql+psycopg://urlshortener:urlshortener@localhost:5432/urlshortener" },
+        { "name": "REDIS_URL", "value": "redis://localhost:6379" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/url-shortener",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "app"
+        }
+      }
+    },
+    {
+      "name": "postgres",
+      "image": "postgres:16",
+      "environment": [
+        { "name": "POSTGRES_USER", "value": "urlshortener" },
+        { "name": "POSTGRES_PASSWORD", "value": "urlshortener" },
+        { "name": "POSTGRES_DB", "value": "urlshortener" }
+      ]
+    },
+    {
+      "name": "redis",
+      "image": "redis:7-alpine"
+    }
+  ]
+}

@@ -68,3 +68,33 @@ jobs:
           docker push $ECR_REGISTRY/url-shortener:$GITHUB_SHA
         env:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+
+  deploy:
+    needs: build-and-push
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: ecr-login
+
+      - uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-task-def
+        with:
+          task-definition: task-def.json
+          container-name: app
+          image: ${{ steps.ecr-login.outputs.registry }}/url-shortener:${{ github.sha }}
+
+      - uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-task-def.outputs.task-definition }}
+          service: url-shortener-service
+          cluster: url-shortener-cluster
+          wait-for-service-stability: true
